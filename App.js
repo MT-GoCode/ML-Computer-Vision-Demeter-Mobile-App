@@ -16,6 +16,7 @@ export default function App() {
   if (hasPermission === null) {
     return <View />;
   }
+  
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
   }
