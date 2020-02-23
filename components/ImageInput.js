@@ -7,7 +7,8 @@ export default function ImageInput(props) {
 
   const [uri, setUri] = useState(null);
   const CONFIG = {
-		allowsEditing: true
+    allowsEditing: true,
+    aspect: [1,1]
   };
   
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function ImageInput(props) {
         >
             <Text>Take Photo</Text>
         </TouchableHighlight>
+        <Text>{uri}</Text>
         
       </View>
     );
