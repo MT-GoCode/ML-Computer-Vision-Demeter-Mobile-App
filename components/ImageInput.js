@@ -53,7 +53,7 @@ export default function ImageInput(props) {
   return (
       <View>
         <Image style  = {{width:65, height: 65, margin: 50, padding: 50}} source = {require('../assets/tomatoicon.png')}/>
-        <Text>Tomato</Text>
+        <Text  style={{textAlignVertical: "center",textAlign: "center",fontWeight:"bold",fontSize:50,}}>Tomato</Text>
         <TouchableHighlight
             // title="Upload Image"
             style = {styles.button}
@@ -71,8 +71,8 @@ export default function ImageInput(props) {
         </TouchableHighlight>
         <Text>{uri}</Text>
 
-  { uri && <Image style  = {{width:65, height: 65, margin: 50, padding: 50}} source = {{ uri: uri}}/> }
-        
+  { uri && <Image style  = {{width:200, height: 200, margin: 50, padding: 50}} source = {{ uri: uri}}/> }
+        {/* displaying image if uri exists, src weirdly takes an object of the uri*/}
       </View>
     );
 }
