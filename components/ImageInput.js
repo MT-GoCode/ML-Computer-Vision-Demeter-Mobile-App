@@ -41,6 +41,15 @@ export default function ImageInput(props) {
       setUri(resp.uri);
   };
 
+
+
+
+
+
+
+
+  //hey
+
   return (
       <View>
         <Image style  = {{width:65, height: 65, margin: 50, padding: 50}} source = {require('../assets/tomatoicon.png')}/>
@@ -61,6 +70,8 @@ export default function ImageInput(props) {
             <Text>Take Photo</Text>
         </TouchableHighlight>
         <Text>{uri}</Text>
+
+  { uri && <Image style  = {{width:65, height: 65, margin: 50, padding: 50}} source = {{ uri: uri}}/> }
         
       </View>
     );
