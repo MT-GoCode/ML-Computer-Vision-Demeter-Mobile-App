@@ -24,7 +24,7 @@ import {styles} from './ImageInput'
 
 function ImageOutput(props) {
     const {uri, predictions} = props;
-
+    console.log("props:" + props)
     return (
         <View style={styles.container} justifyContent = 'center'>
             <View style = {styles.imageContainer}>
@@ -37,6 +37,7 @@ function ImageOutput(props) {
 
                     <Text style={styles.choosetext}>Input another photo</Text>
                 </TouchableOpacity>
+                
             </View>
         </View>
         

@@ -38,6 +38,8 @@ class ImageInput extends React.Component {
     this.setState({
       isTfReady: true
     })
+    console.log(this.props)
+    
     this.model = await mobilenet.load()
     this.setState({ isModelReady: true })
     // this.camperm()
@@ -98,6 +100,7 @@ class ImageInput extends React.Component {
       const predictions = await this.model.classify(imageTensor)
       this.setState({ predictions })
       this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
+      console.log("pred" + predictions)
       console.log(predictions)
     } catch (error) {
       console.log(error)
