@@ -10,6 +10,9 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.8.1",
     "@react-native-community/cameraroll": "^1.4.1",
+    "@react-native-community/masked-view": "0.1.5",
+    "@react-navigation/native": "^5.0.9",
+    "@react-navigation/stack": "^5.1.1",
     "@tensorflow-models/mobilenet": "^2.0.4",
     "@tensorflow/tfjs": "^1.6.0",
     "@tensorflow/tfjs-react-native": "^0.2.3",
@@ -26,6 +29,10 @@
     "react-native-camera": "^3.18.0",
     "react-native-camera-roll-picker": "^2.0.0",
     "react-native-fs": "^2.16.6",
+    "react-native-gesture-handler": "~1.5.0",
+    "react-native-reanimated": "~1.4.0",
+    "react-native-safe-area-context": "0.6.0",
+    "react-native-screens": "2.0.0-alpha.12",
     "react-native-web": "~0.11.7",
     "react-navigation": "^4.1.1"
   },

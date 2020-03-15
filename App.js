@@ -1,3 +1,7 @@
+import 'react-native-gesture-handler'; 
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
 // import React, { useState, useEffect } from 'react';
 // import { Text, View, TouchableOpacity } from 'react-native';
 // import { Camera } from 'expo-camera';
@@ -53,6 +57,7 @@ import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import SelectScreen from './components/SelectScreen'
 import ImageInput from './components/ImageInput'
+import ImageOutput from './components/ImageOutput'
 import CameraRollPicker from 'react-native-camera-roll-picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
@@ -61,7 +66,7 @@ import * as Permissions from 'expo-permissions';
 // import { RNCamera } from 'react-native-camera';
 // import { Camera } from 'expo-camera';
 
-export default function App() {
+function App() {
   const [selectedModel,setSelectedModel] = useState(null)
   const [hasPermission, setHasPermission] = useState(null);
   // const [type, setType] = useState(Camera.Constants.Type.back);
@@ -72,13 +77,24 @@ export default function App() {
     
     <View style={styles.container} justifyContent = 'center'>
       {selectedModel}
-      <ImageInput/>
+      <ImageOutput uri="https://d384u2mq2suvbq.cloudfront.net/public/spree/products/1594/jumbo/Tomato-Leaf-Fragrance-Oil.jpg?1529607054" />
       
       
     </View>
   );
 }
-
+const MainStack  = createStackNavigator();
+export default function MainStackScreen() { 
+  return (
+    <NavigationContainer >
+      <MainStack.Navigator initialRouteName="ImageInput">
+        <MainStack.Screen name="ImageInput" component={ImageInput} />
+        <MainStack.Screen name="ImageOutput" component={ImageOutput} />
+      </MainStack.Navigator>
+    </NavigationContainer>
+    
+  )
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

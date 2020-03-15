@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React, {useState, useEffect} from 'react'
 import {
   StyleSheet,
@@ -22,6 +23,7 @@ const CONFIG = {
 };
 
 class ImageInput extends React.Component {
+
   state = {
     isTfReady: false,
     isModelReady: false,
@@ -95,6 +97,7 @@ class ImageInput extends React.Component {
       const imageTensor = this.imageToTensor(rawImageData)
       const predictions = await this.model.classify(imageTensor)
       this.setState({ predictions })
+      this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
       console.log(predictions)
     } catch (error) {
       console.log(error)
@@ -127,7 +130,7 @@ class ImageInput extends React.Component {
     if (resp) {
       console.log(resp.uri);
       const source = { uri: resp.uri }
-      this.setState({ image: source});
+      this.setState({ image: source, uri: resp.uri});
       this.classifyImage()
       
     }
@@ -139,7 +142,7 @@ class ImageInput extends React.Component {
     if (resp) {
       console.log(resp.uri);
       const source = { uri: resp.uri }
-      this.setState({ image: source})
+      this.setState({ image: source,uri:resp.uri})
       this.classifyImage()
     }
   };
@@ -157,17 +160,15 @@ class ImageInput extends React.Component {
     const { isTfReady, isModelReady, predictions, image, uri } = this.state
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} justifyContent = 'center'>
+        {console.log(uri)}
         <StatusBar barStyle='light-content' />
         <View style={styles.loadingContainer}>
-          <Text style={styles.text}>
-            TFJS ready? {isTfReady ? <Text>✅</Text> : ''}
-          </Text>
-
+          <Text style={{fontSize: 40, fontWeight: 'bold'}}>Tomato Model</Text>
           <View style={styles.loadingModelContainer}>
-            <Text style={styles.text}>Model ready? </Text>
+            <Text style={styles.text}>Please wait for the tomato to appear:</Text>
             {isModelReady ? (
-              <Text style={styles.text}>✅</Text>
+              <Text style={styles.text}>🍅</Text>
             ) : (
               <ActivityIndicator size='small' />
             )}
@@ -175,14 +176,14 @@ class ImageInput extends React.Component {
         </View>
 
         <View style = {styles.imageContainer}>
-          {uri && <Image source={image} style = {styles.imageContainer} />}
+          {<Image source={uri === null ? {uri:'https://www.stleos.uq.edu.au/wp-content/uploads/2016/08/image-placeholder.png'} : {uri:uri}} style = {styles.imageContainer} />}
         </View>
 
         <TouchableOpacity
           style={styles.imageWrapper}
           onPress={isModelReady ? this.takePhoto : undefined}>
         
-          {isModelReady && !image && (
+          {(
             <Text style={styles.choosetext} >Tap to take a photo</Text>
           )}
         </TouchableOpacity>
@@ -191,7 +192,7 @@ class ImageInput extends React.Component {
           style={styles.imageWrapper}
           onPress={isModelReady ? this.selectImage : undefined}>
 
-          {isModelReady && !image && (
+          {(
             <Text style={styles.choosetext}>Tap to upload photo</Text>
           )}
         </TouchableOpacity>
@@ -211,7 +212,7 @@ class ImageInput extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     // backgroundColor: '#171f24',
@@ -236,12 +237,10 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   imageWrapper: {
-    width: 280,
-    height: 50,
+    width: 250,
+    height: 60,
     padding: 10,
-    borderColor: '#006600',
-    borderWidth: 2,
-    borderRadius: 50,
+    borderRadius: 5,
     // borderStyle: 'dashed',
     marginTop: 20,
     backgroundColor: '#009900',
@@ -258,9 +257,6 @@ const styles = StyleSheet.create({
     // left: 10,
     // bottom: 10,
     // right: 10,
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "#009900"
   },
   predictionWrapper: {
     height: 100,
