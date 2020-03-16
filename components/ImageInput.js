@@ -10,6 +10,7 @@ import {
   TouchableOpacity
 } from 'react-native'
 import * as tf from '@tensorflow/tfjs'
+// require('@tensorflow/tfjs-node')
 import { fetch } from '@tensorflow/tfjs-react-native'
 import * as mobilenet from '@tensorflow-models/mobilenet'
 import * as jpeg from 'jpeg-js'
@@ -31,20 +32,34 @@ class ImageInput extends React.Component {
     image: null,
     uri: null
   }
-  
 
   async componentDidMount() {
     await tf.ready()
     this.setState({
       isTfReady: true
     })
-    console.log(this.props)
+    // console.log(this.props)
     
-    this.model = await mobilenet.load()
+    // this.model = await mobilenet.load() // ORIGINALLY LOADING MOBILE NETS
+    this.loadModel('tfjs_model_to_use')
     this.setState({ isModelReady: true })
     // this.camperm()
     // this.camrollperm()
     this.getPermissionAsync()
+  }
+  
+  loadModel = async (name) => {
+    // model = undefined;
+    console.log('weowi;rjg')
+    try {
+    this.model = await tf.loadLayersModel('file://tfjs-models/tfjs_model_to_use/content/tfjs_model_to_use/model.json')
+    console.log('sdgs')
+    }
+    catch (error) {
+      console.log('dfslkmlsemo')
+      console.log(error)
+    }
+    // model = await tf.loadModel('../tfjs-models/tfjs_model_to_use/content/tfjs_model_to_use/model.json')//(`http://localhost:81/tfjs-models/${name}/model.json`); //replace localhost w/ 10.0.0.14
   }
 
   // camperm = async() => {
@@ -93,15 +108,23 @@ class ImageInput extends React.Component {
 
   classifyImage = async () => {
     try {
+      console.log('eee' + this.model)
       const imageAssetPath = Image.resolveAssetSource(this.state.image)
       const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
       const rawImageData = await response.arrayBuffer()
       const imageTensor = this.imageToTensor(rawImageData)
       const predictions = await this.model.classify(imageTensor)
+
+      
       this.setState({ predictions })
       this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
-      console.log("pred" + predictions)
-      console.log(predictions)
+      // console.log("pred" + predictions)
+      // console.log(predictions)
+
+      // ------------
+
+
+      // ------------
     } catch (error) {
       console.log(error)
     }
@@ -131,7 +154,7 @@ class ImageInput extends React.Component {
             aspect: [4, 3]
     })
     if (resp) {
-      console.log(resp.uri);
+      // console.log(resp.uri);
       const source = { uri: resp.uri }
       this.setState({ image: source, uri: resp.uri});
       this.classifyImage()
@@ -143,7 +166,7 @@ class ImageInput extends React.Component {
   takePhoto = async () => { 
     const resp = await ImagePicker.launchCameraAsync(CONFIG);
     if (resp) {
-      console.log(resp.uri);
+      // console.log(resp.uri);
       const source = { uri: resp.uri }
       this.setState({ image: source,uri:resp.uri})
       this.classifyImage()
@@ -151,7 +174,7 @@ class ImageInput extends React.Component {
   };
 
   renderPrediction = prediction => {
-    console.log(prediction)
+    // console.log(prediction)
     return (
       <Text key={prediction.className} style={styles.text}>
         {prediction.className}
@@ -164,7 +187,6 @@ class ImageInput extends React.Component {
 
     return (
       <View style={styles.container} justifyContent = 'center'>
-        {console.log(uri)}
         <StatusBar barStyle='light-content' />
         <View style={styles.loadingContainer}>
           <Text style={{fontSize: 40, fontWeight: 'bold'}}>Tomato Model</Text>
