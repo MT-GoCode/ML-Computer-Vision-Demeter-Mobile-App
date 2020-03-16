@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native'
 import * as tf from '@tensorflow/tfjs'
 import { fetch } from '@tensorflow/tfjs-react-native'
@@ -25,6 +25,7 @@ const CONFIG = {
 class ImageInput extends React.Component {
 
   state = {
+    showDisplay: true,
     isTfReady: false,
     isModelReady: false,
     predictions: null,
@@ -93,6 +94,7 @@ class ImageInput extends React.Component {
 
   classifyImage = async () => {
     try {
+      this.setState({showDisplay:false})
       const imageAssetPath = Image.resolveAssetSource(this.state.image)
       const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
       const rawImageData = await response.arrayBuffer()
@@ -100,6 +102,7 @@ class ImageInput extends React.Component {
       const predictions = await this.model.classify(imageTensor)
       this.setState({ predictions })
       this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
+      this.setState({showDisplay:true})
       console.log("pred" + predictions)
       console.log(predictions)
     } catch (error) {
@@ -150,68 +153,67 @@ class ImageInput extends React.Component {
     }
   };
 
-  renderPrediction = prediction => {
-    console.log(prediction)
-    return (
-      <Text key={prediction.className} style={styles.text}>
-        {prediction.className}
-      </Text>
-    )
-  }
+  
 
   render() {
     const { isTfReady, isModelReady, predictions, image, uri } = this.state
+    this.stat
 
-    return (
-      <View style={styles.container} justifyContent = 'center'>
-        {console.log(uri)}
-        <StatusBar barStyle='light-content' />
-        <View style={styles.loadingContainer}>
-          <Text style={{fontSize: 40, fontWeight: 'bold'}}>Tomato Model</Text>
-          <View style={styles.loadingModelContainer}>
-            <Text style={styles.text}>Please wait for the tomato to appear:</Text>
-            {isModelReady ? (
-              <Text style={styles.text}>🍅</Text>
-            ) : (
-              <ActivityIndicator size='small' />
-            )}
+    if (this.state.showDisplay){
+      return (
+        <View style={styles.container} justifyContent = 'flex-start'>
+          {console.log(uri)}
+          <StatusBar barStyle='light-content' />
+          <View style={styles.loadingContainer}>
+            <Text style={{fontSize: 40, fontWeight: 'bold'}}>Tomato Model</Text>
+            <View style={styles.loadingModelContainer}>
+              <Text style={styles.text}>Please wait for the tomato to appear:</Text>
+              {isModelReady ? (
+                <Text style={styles.text}>🍅</Text>
+              ) : (
+                <ActivityIndicator size='small' />
+              )}
+            </View>
           </View>
+
+          <View style = {styles.imageContainer}>
+            {<Image source={uri === null ? {uri:'https://d384u2mq2suvbq.cloudfront.net/public/spree/products/1594/jumbo/Tomato-Leaf-Fragrance-Oil.jpg?1529607054'} : {uri:uri}} style = {styles.imageContainer} />}
+          </View>
+          <View>
+            <TouchableOpacity
+              disabled={isModelReady ? (false): (true)}
+              style={isModelReady ? (styles.imageWrapper): (styles.imageWrapperDisabled) }
+              onPress={isModelReady ? this.takePhoto : undefined}>
+            
+              {(
+                <Text style={styles.choosetext} >Tap to take a photo</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              disabled={isModelReady ? (false): (true)}
+              style={isModelReady ? (styles.imageWrapper): (styles.imageWrapperDisabled)}
+              onPress={isModelReady ? this.selectImage : undefined}>
+
+              {(
+                <Text style={styles.choosetext}>Tap to upload photo</Text>
+              )}
+            </TouchableOpacity>
+          </View>      
         </View>
-
-        <View style = {styles.imageContainer}>
-          {<Image source={uri === null ? {uri:'https://www.stleos.uq.edu.au/wp-content/uploads/2016/08/image-placeholder.png'} : {uri:uri}} style = {styles.imageContainer} />}
+      )
+    }else{
+      return(
+        <View style={styles.container} justifyContent='center'>
+          <Image 
+            style= {styles.loadingImg}
+            source={{uri: "https://lh3.googleusercontent.com/proxy/OG84Tu_5sVyczbEJ-XaErd93-c__Tq7KH0dpVcyjoqZw4io8mpaFtaxYSISq23SCcPiqQM9qkLk_nY2x506hNOqOTpeMwcg_IB-bVMX5HDdxPZzvO1TJtygKDUnaqmxIVdSfYWyVDRQ"}}
+          />
         </View>
+      )
+    }
 
-        <TouchableOpacity
-          style={styles.imageWrapper}
-          onPress={isModelReady ? this.takePhoto : undefined}>
-        
-          {(
-            <Text style={styles.choosetext} >Tap to take a photo</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.imageWrapper}
-          onPress={isModelReady ? this.selectImage : undefined}>
-
-          {(
-            <Text style={styles.choosetext}>Tap to upload photo</Text>
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.predictionWrapper}>
-          {isModelReady && image && (
-            <Text style={styles.text}>
-              Predictions: {predictions ? '' : 'Predicting...'}
-            </Text>
-          )}
-          {isModelReady &&
-            predictions &&
-            predictions.map(p => this.renderPrediction(p))}
-        </View>
-      </View>
-    )
+    
   }
 }
 
@@ -220,11 +222,18 @@ export const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: '#171f24',
     alignItems: 'center',
-    // justifyContent: 'center'
+    justifyContent: 'center'
   },
   loadingContainer: {
     marginTop: 80,
     justifyContent: 'center'
+    
+  },
+  loadingImg:{
+    height: 200,
+    width: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
     // color: '#ffffff',
@@ -252,10 +261,25 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
+  imageWrapperDisabled: {
+    width: 250,
+    height: 60,
+    padding: 10,
+    borderRadius: 5,
+    // borderStyle: 'dashed',
+    marginTop: 20,
+    backgroundColor: '#949399',
+    marginBottom: 10,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   imageContainer: {
     width: 250,
     height: 250,
     position: 'relative',
+    marginTop: 20,
+    marginBottom: 40,
     // top: 10,
     // left: 10,
     // bottom: 10,
