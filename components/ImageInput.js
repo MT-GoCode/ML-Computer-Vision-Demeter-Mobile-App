@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import * as tf from '@tensorflow/tfjs'
 // require('@tensorflow/tfjs-node')
-import { fetch } from '@tensorflow/tfjs-react-native'
+import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native'
 import * as mobilenet from '@tensorflow-models/mobilenet'
 import * as jpeg from 'jpeg-js'
 import * as ImagePicker from 'expo-image-picker'
@@ -41,6 +41,7 @@ class ImageInput extends React.Component {
     // console.log(this.props)
     
     // this.model = await mobilenet.load() // ORIGINALLY LOADING MOBILE NETS
+    this.model = await this.loadModel('tfjs_model_to_use')
     this.loadModel('tfjs_model_to_use')
     this.setState({ isModelReady: true })
     // this.camperm()
@@ -49,11 +50,15 @@ class ImageInput extends React.Component {
   }
   
   loadModel = async (name) => {
-    // model = undefined;
+    // model = undefined; 
     console.log('weowi;rjg')
     try {
-    this.model = await tf.loadLayersModel('file://tfjs-models/tfjs_model_to_use/content/tfjs_model_to_use/model.json')
-    console.log('sdgs')
+      const modelJson = require('../assets/tfjs_model_to_use/model.json')
+      const modelWeights = require('../assets/tfjs_model_to_use/group1-shard1of1.bin')
+      return await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights))//'file://tfjs-models/tfjs_model_to_use/content/tfjs_model_to_use/model.json')//'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json')
+      console.log('sdgs')
+      // local load look at google's main example - why cant it resolve .bin?
+      // online load, server?
     }
     catch (error) {
       console.log('dfslkmlsemo')
@@ -113,7 +118,7 @@ class ImageInput extends React.Component {
       const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
       const rawImageData = await response.arrayBuffer()
       const imageTensor = this.imageToTensor(rawImageData)
-      const predictions = await this.model.classify(imageTensor)
+      const predictions = await this.model.predict(imageTensor)
 
       
       this.setState({ predictions })
