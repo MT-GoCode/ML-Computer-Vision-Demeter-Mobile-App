@@ -177,7 +177,10 @@ class ImageInput extends React.Component {
           </View>
 
           <View style = {styles.imageContainer}>
-            {<Image source={uri === null ? {uri:'https://d384u2mq2suvbq.cloudfront.net/public/spree/products/1594/jumbo/Tomato-Leaf-Fragrance-Oil.jpg?1529607054'} : {uri:uri}} style = {styles.imageContainer} />}
+              <Image 
+                style = {styles.imageContainer}
+                source = {require('/Users/edwardjung/projects/dEMeter/Demeter/assets/coverPhoto.jpeg')} 
+              />
           </View>
           <View>
             <TouchableOpacity
@@ -207,7 +210,7 @@ class ImageInput extends React.Component {
         <View style={styles.container} justifyContent='center'>
           <Image 
             style= {styles.loadingImg}
-            source={{uri: "https://lh3.googleusercontent.com/proxy/OG84Tu_5sVyczbEJ-XaErd93-c__Tq7KH0dpVcyjoqZw4io8mpaFtaxYSISq23SCcPiqQM9qkLk_nY2x506hNOqOTpeMwcg_IB-bVMX5HDdxPZzvO1TJtygKDUnaqmxIVdSfYWyVDRQ"}}
+            source={require('/Users/edwardjung/projects/dEMeter/Demeter/assets/loadingImg.gif')}
           />
         </View>
       )
