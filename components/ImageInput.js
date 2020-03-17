@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import * as tf from '@tensorflow/tfjs'
 // require('@tensorflow/tfjs-node')
-import { fetch, bundleResourceIO } from '@tensorflow/tfjs-react-native'
+import { fetch, bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native'
 import * as mobilenet from '@tensorflow-models/mobilenet'
 import * as jpeg from 'jpeg-js'
 import * as ImagePicker from 'expo-image-picker'
@@ -42,7 +42,8 @@ class ImageInput extends React.Component {
     
     // this.model = await mobilenet.load() // ORIGINALLY LOADING MOBILE NETS
     this.model = await this.loadModel('tfjs_model_to_use')
-    this.loadModel('tfjs_model_to_use')
+    console.log('model after fetch: ' + this.model)
+    // this.loadModel('tfjs_model_to_use')
     this.setState({ isModelReady: true })
     // this.camperm()
     // this.camrollperm()
@@ -51,12 +52,12 @@ class ImageInput extends React.Component {
   
   loadModel = async (name) => {
     // model = undefined; 
-    console.log('weowi;rjg')
+    // console.log('weowi;rjg')
     try {
       const modelJson = require('../assets/tfjs_model_to_use/model.json')
       const modelWeights = require('../assets/tfjs_model_to_use/group1-shard1of1.bin')
+      console.log('fetching now')
       return await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights))//'file://tfjs-models/tfjs_model_to_use/content/tfjs_model_to_use/model.json')//'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json')
-      console.log('sdgs')
       // local load look at google's main example - why cant it resolve .bin?
       // online load, server?
     }
@@ -113,16 +114,26 @@ class ImageInput extends React.Component {
 
   classifyImage = async () => {
     try {
-      console.log('eee' + this.model)
-      const imageAssetPath = Image.resolveAssetSource(this.state.image)
-      const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
-      const rawImageData = await response.arrayBuffer()
-      const imageTensor = this.imageToTensor(rawImageData)
-      const predictions = await this.model.predict(imageTensor)
+
+
+      console.log('model right before classification: ' + this.model)
+      console.log('uri to classify: ' + this.state.uri)
+      const response = await fetch(this.state.uri, {}, { isBinary: true });
+      console.log('response: ' + response)
+      const imageData = await response.arrayBuffer();
+      console.log('imageData: ' + imageData)
+      const imageTensor = decodeJpeg(imageData);
+      console.log('imageTensor: ' + imageData)
+      const prediction = (await this.model.predict(imageTensor))[0];
+      // const imageAssetPath = Image.resolveAssetSource(this.state.image)
+      // const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
+      // const rawImageData = await response.arrayBuffer()
+      // const imageTensor = this.imageToTensor(rawImageData)
+      // const predictions = await this.model.predict(imageTensor)
 
       
-      this.setState({ predictions })
-      this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
+      this.setState({ predictions: prediction })
+      // this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
       // console.log("pred" + predictions)
       // console.log(predictions)
 
@@ -156,10 +167,11 @@ class ImageInput extends React.Component {
     let resp = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
-            aspect: [4, 3]
+            aspect: [1, 1]
     })
     if (resp) {
       // console.log(resp.uri);
+      console.log(resp)
       const source = { uri: resp.uri }
       this.setState({ image: source, uri: resp.uri});
       this.classifyImage()
