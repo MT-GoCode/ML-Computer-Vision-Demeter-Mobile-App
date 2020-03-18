@@ -17,11 +17,25 @@ import * as jpeg from 'jpeg-js'
 import * as ImagePicker from 'expo-image-picker'
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
+import ImageResizer from 'react-native-image-resizer';
 
 const CONFIG = {
   allowsEditing: true,
-  aspect: [4,3]
+  aspect: [1,1]
 };
+
+const IMAGENET_CLASSES = {
+  0: 'Tomato___Bacterial_spot', 
+  1: 'Tomato___Late_blight',
+  2: 'Tomato___Tomato_mosaic_virus',
+  3: 'Tomato___Target_Spot',
+  4: 'Tomato___Leaf_Mold',
+  5: 'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
+  6: 'Tomato___Early_blight',
+  7: 'Tomato___Spider_mites Two-spotted_spider_mite',
+  8: 'Tomato___Septoria_leaf_spot',
+  9: 'Tomato___healthy'
+}
 
 class ImageInput extends React.Component {
 
@@ -54,8 +68,8 @@ class ImageInput extends React.Component {
     // model = undefined; 
     // console.log('weowi;rjg')
     try {
-      const modelJson = require('../assets/tfjs_model_to_use/model.json')
-      const modelWeights = require('../assets/tfjs_model_to_use/group1-shard1of1.bin')
+      const modelJson = require('../assets/tfjs_model_to_use_trained/model.json')
+      const modelWeights = require('../assets/tfjs_model_to_use_trained/group1-shard1of1.bin')
       console.log('fetching now')
       return await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights))//'file://tfjs-models/tfjs_model_to_use/content/tfjs_model_to_use/model.json')//'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json')
       // local load look at google's main example - why cant it resolve .bin?
@@ -98,41 +112,94 @@ class ImageInput extends React.Component {
   imageToTensor(rawImageData) {
     const TO_UINT8ARRAY = true
     const { width, height, data } = jpeg.decode(rawImageData, TO_UINT8ARRAY)
+
     // Drop the alpha channel info for mobilenet
     const buffer = new Uint8Array(width * height * 3)
     let offset = 0 // offset into original data
-    for (let i = 0; i < buffer.length; i += 3) {
+    for (let i = 0; i < buffer.length; i += 1) {
       buffer[i] = data[offset]
       buffer[i + 1] = data[offset + 1]
       buffer[i + 2] = data[offset + 2]
 
-      offset += 4
+      offset += 1
     }
 
-    return tf.tensor3d(buffer, [height, width, 3])
+    const tensa = tf.tensor4d(buffer, [1, height, width, 3])
+    const tensb = tf.image.resizeNearestNeighbor(tensa, [128,128])
+    return tensb
+
   }
 
   classifyImage = async () => {
     try {
+      this.setState({showDisplay:false})
+
+      const imageAssetPath = Image.resolveAssetSource(this.state.image)
+      const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
+      const rawImageData = await response.arrayBuffer()
+      const imageTensor = this.imageToTensor(rawImageData)
+      // const imageTensor = decodeJpeg(rawImageData);
+      // const predictions = (await this.model.predict(imageTensor))[0];
+      const prepred = await this.model.predict(imageTensor).data()
+      const arr = Array.from(prepred)
+      console.log(arr[0])
+      var max = arr[0];
+      var maxIndex = 0;
+
+      for (var i = 1; i < arr.length; i++) {
+          if (arr[i] > max) {
+              maxIndex = i;
+              max = arr[i];
+          }
+      }
 
 
-      console.log('model right before classification: ' + this.model)
-      console.log('uri to classify: ' + this.state.uri)
-      const response = await fetch(this.state.uri, {}, { isBinary: true });
-      console.log('response: ' + response)
-      const imageData = await response.arrayBuffer();
-      console.log('imageData: ' + imageData)
-      const imageTensor = decodeJpeg(imageData);
-      console.log('imageTensor: ' + imageData)
-      const prediction = (await this.model.predict(imageTensor))[0];
+      // let top3 = arr
+      //   .map(function (p, i) {
+      //       return {
+      //           probability: p,
+      //           className: IMAGENET_CLASSES[i]
+      //       };
+      //   }).sort(function (a, b) {
+      //       return b.probability - a.probability;
+      //   }).slice(0, 3);
+
+      console.log('max: ' + maxIndex)
+      this.setState({ predictions: IMAGENET_CLASSES[maxIndex] })
+      this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: [{className: 'efw'}]})
+      this.setState({showDisplay:true})
+      // console.log("pred " + predictions)
+      // console.log(predictions)
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  classifyImageNull = async () => {
+    try {
+      // const image = require('../assets/Travel_CENTERS_OF_America_1563212947.jpg')
+
+      // const response = await fetch(this.state.uri, {}, { isBinary: true });
+      // const imageData = await response.arrayBuffer();
+      // const imageTensor = decodeJpeg(imageData);
+
+      // const predictions = (await model.predict(imageTensor))[0];
+
+      // const imageAssetPath = Image.resolveAssetSource(image);
+      // const response = await fetch(imageAssetPath.uri, {}, { isBinary: true });
+      // const imageData = await response.arrayBuffer();
+      // console.log('weoi')
+      // const imageTensor = decodeJpeg(imageData);
+      // console.log('weoierg')
+
+      // const prediction = (await this.model.predict(imageTensor))[0];
+
       // const imageAssetPath = Image.resolveAssetSource(this.state.image)
       // const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
       // const rawImageData = await response.arrayBuffer()
       // const imageTensor = this.imageToTensor(rawImageData)
-      // const predictions = await this.model.predict(imageTensor)
-
-      
-      this.setState({ predictions: prediction })
+      // const predictions = await this.model.classify(imageTensor)
+      this.setState({ predictions })
       // this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: predictions})
       // console.log("pred" + predictions)
       // console.log(predictions)
@@ -146,22 +213,6 @@ class ImageInput extends React.Component {
     }
   }
 
-  // selectImage = async () => {
-  //   try {
-  //     let response = await ImagePicker.launchImageLibraryAsync({
-  //       mediaTypes: ImagePicker.MediaTypeOptions.All,
-  //       allowsEditing: true,
-  //       aspect: [4, 3]
-  //     })
-  //     console.log(response.uri)
-  //     if (!response.cancelled) {
-  //       const source = { uri: response.uri }
-  //       this.setState({ image: source })
-  //       this.classifyImage()
-  //     }
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
   // }
   selectImage = async () => {
     let resp = await ImagePicker.launchImageLibraryAsync({
@@ -245,9 +296,10 @@ class ImageInput extends React.Component {
               Predictions: {predictions ? '' : 'Predicting...'}
             </Text>
           )}
-          {isModelReady &&
+          <Text>{predictions}</Text>
+          {/* {isModelReady &&
             predictions &&
-            predictions.map(p => this.renderPrediction(p))}
+            predictions.map(p => this.renderPrediction(p))} */}
         </View>
       </View>
     )
