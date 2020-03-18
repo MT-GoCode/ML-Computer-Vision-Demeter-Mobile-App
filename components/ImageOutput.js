@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker'
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
 import {styles} from './ImageInput'
-
+import Info from './info.js'
 
 
 
@@ -54,14 +54,15 @@ function ImageOutput(props) {
                     <Image source={{uri:uri}} style = {styles.imageContainer} />
                 </View>
                 {/* <View>{predictions.map(p => renderPrediction(p))}</View> */}
-                <Text>Septoria Leaf Spot</Text>
+                
+                <Info/>
+                
                 <TouchableOpacity
                     style={styles2.imageWrapper}
                     onPress={() => {navigation.navigate("ImageInput")}}>
 
                     <Text style={styles.choosetext}>Input another photo</Text>
                 </TouchableOpacity>
-                
         </View>
         
     )
