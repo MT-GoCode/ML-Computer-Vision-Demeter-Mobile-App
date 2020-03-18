@@ -21,26 +21,50 @@ import {styles} from './ImageInput'
 
 
 
-
+const styles2 = {imageWrapper: {
+    width: 250,
+    height: 60,
+    padding: 10,
+    borderRadius: 5,
+    // borderStyle: 'dashed',
+    marginTop: 20,
+    backgroundColor: '#009900',
+    marginBottom: 10,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }}
 function ImageOutput(props) {
-    const {uri, predictions} = props;
-    console.log("props:" + props)
+    const {route, navigation} = props;
+    const {uri, predictions} = route.params;
+    console.log("route:" + route)
+ 
+    const renderPrediction = (p) => {
+        return(<Text>
+            {p.className}
+        </Text>)
+    }
+
     return (
-        <View style={styles.container} justifyContent = 'center'>
-            <View style = {styles.imageContainer}>
+        <View style={styles.container} justifyContent = "flex-start" >
+            <StatusBar barStyle='light-content' />
+            <View style={styles.loadingContainer}></View>
                 <Text style={{fontSize: 31, fontWeight: 'bold', textAlign: 'center'}}>Tomato Results</Text>
-<Text> {uri}</Text>
-                <Image source={{uri:uri}} style = {styles.imageContainer} />
+                <View style = {styles.imageContainer}>
+                    <Image source={{uri:uri}} style = {styles.imageContainer} />
+                </View>
+                {/* <View>{predictions.map(p => renderPrediction(p))}</View> */}
+                <Text>{predictions}</Text>
                 <TouchableOpacity
-                    style={styles.imageWrapper}
-                    onPress={() => {}}>
+                    style={styles2.imageWrapper}
+                    onPress={() => {navigation.navigate("ImageInput")}}>
 
                     <Text style={styles.choosetext}>Input another photo</Text>
                 </TouchableOpacity>
                 
-            </View>
         </View>
         
     )
 }
+
 export default ImageOutput

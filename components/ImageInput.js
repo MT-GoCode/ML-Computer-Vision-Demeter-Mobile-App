@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native'
 import * as tf from '@tensorflow/tfjs'
 // require('@tensorflow/tfjs-node')
@@ -41,6 +41,7 @@ const IMAGENET_CLASSES = {
 class ImageInput extends React.Component {
 
   state = {
+    showDisplay: true,
     isTfReady: false,
     isModelReady: false,
     predictions: null,
@@ -134,7 +135,6 @@ class ImageInput extends React.Component {
   classifyImage = async () => {
     try {
       this.setState({showDisplay:false})
-
       const imageAssetPath = Image.resolveAssetSource(this.state.image)
       const response = await fetch(imageAssetPath.uri, {}, { isBinary: true })
       const rawImageData = await response.arrayBuffer()
@@ -167,7 +167,7 @@ class ImageInput extends React.Component {
 
       console.log('max: ' + maxIndex)
       this.setState({ predictions: IMAGENET_CLASSES[maxIndex] })
-      this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: [{className: 'efw'}]})
+      this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: IMAGENET_CLASSES[maxIndex]})
       this.setState({showDisplay:true})
       // console.log("pred " + predictions)
       // console.log(predictions)
@@ -214,20 +214,19 @@ class ImageInput extends React.Component {
     }
   }
 
+
   // }
   selectImage = async () => {
-    let resp = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [1, 1]
-    })
+    let resp = await ImagePicker.launchImageLibraryAsync(
+      {
+        allowsEditing: true,
+        aspect: [1,1]
+      }
+    )
     if (resp) {
-      // console.log(resp.uri);
-      console.log(resp)
       const source = { uri: resp.uri }
       this.setState({ image: source, uri: resp.uri});
       this.classifyImage()
-      
     }
   }
 
@@ -235,7 +234,6 @@ class ImageInput extends React.Component {
   takePhoto = async () => { 
     const resp = await ImagePicker.launchCameraAsync(CONFIG);
     if (resp) {
-      // console.log(resp.uri);
       const source = { uri: resp.uri }
       this.setState({ image: source,uri:resp.uri})
       this.classifyImage()
@@ -253,57 +251,66 @@ class ImageInput extends React.Component {
 
   render() {
     const { isTfReady, isModelReady, predictions, image, uri } = this.state
+    this.stat
 
-    return (
-      <View style={styles.container} justifyContent = 'center'>
-        <StatusBar barStyle='light-content' />
-        <View style={styles.loadingContainer}>
-          <Text style={{fontSize: 40, fontWeight: 'bold'}}>Tomato Model</Text>
-          <View style={styles.loadingModelContainer}>
-            <Text style={styles.text}>Please wait for the tomato to appear:</Text>
-            {isModelReady ? (
-              <Text style={styles.text}>🍅</Text>
-            ) : (
-              <ActivityIndicator size='small' />
-            )}
+    if (this.state.showDisplay){
+      return (
+        <View style={styles.container} justifyContent = 'flex-start'>
+          <StatusBar barStyle='light-content' />
+          <View style={styles.loadingContainer}>
+            <Text style={{fontSize: 40, fontWeight: 'bold'}}>Tomato Model</Text>
+            <View style={styles.loadingModelContainer}>
+              <Text style={styles.text}>Please wait for the tomato to appear:</Text>
+              {isModelReady ? (
+                <Text style={styles.text}>🍅</Text>
+              ) : (
+                <ActivityIndicator size='small' />
+              )}
+            </View>
           </View>
+
+          <View style = {styles.imageContainer}>
+              <Image 
+                style = {styles.imageContainer}
+                source = {require('../assets/coverPhoto.jpeg')} 
+              />
+          </View>
+          <View>
+            <TouchableOpacity
+              disabled={isModelReady ? (false): (true)}
+              style={isModelReady ? (styles.imageWrapper): (styles.imageWrapperDisabled) }
+              onPress={isModelReady ? this.takePhoto : undefined}>
+            
+              {(
+                <Text style={styles.choosetext} >Tap to take a photo</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              disabled={isModelReady ? (false): (true)}
+              style={isModelReady ? (styles.imageWrapper): (styles.imageWrapperDisabled)}
+              onPress={isModelReady ? this.selectImage : undefined}>
+
+              {(
+                <Text style={styles.choosetext}>Tap to upload photo</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          {/* <Text>{predictions}</Text>       */}
         </View>
-
-        <View style = {styles.imageContainer}>
-          {<Image source={uri === null ? {uri:'https://www.stleos.uq.edu.au/wp-content/uploads/2016/08/image-placeholder.png'} : {uri:uri}} style = {styles.imageContainer} />}
+      )
+    }else{
+      return(
+        <View style={styles.container} justifyContent='center'>
+          <Image 
+            style= {styles.loadingImg}
+            source={require('../assets/loadingImg.gif')}
+          />
         </View>
+      )
+    }
 
-        <TouchableOpacity
-          style={styles.imageWrapper}
-          onPress={isModelReady ? this.takePhoto : undefined}>
-        
-          {(
-            <Text style={styles.choosetext} >Tap to take a photo</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.imageWrapper}
-          onPress={isModelReady ? this.selectImage : undefined}>
-
-          {(
-            <Text style={styles.choosetext}>Tap to upload photo</Text>
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.predictionWrapper}>
-          {isModelReady && image && (
-            <Text style={styles.text}>
-              Predictions: {predictions ? '' : 'Predicting...'}
-            </Text>
-          )}
-          <Text>{predictions}</Text>
-          {/* {isModelReady &&
-            predictions &&
-            predictions.map(p => this.renderPrediction(p))} */}
-        </View>
-      </View>
-    )
+    
   }
 }
 
@@ -312,11 +319,18 @@ export const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: '#171f24',
     alignItems: 'center',
-    // justifyContent: 'center'
+    justifyContent: 'center'
   },
   loadingContainer: {
     marginTop: 80,
     justifyContent: 'center'
+    
+  },
+  loadingImg:{
+    height: 200,
+    width: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
     // color: '#ffffff',
@@ -344,10 +358,25 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
+  imageWrapperDisabled: {
+    width: 250,
+    height: 60,
+    padding: 10,
+    borderRadius: 5,
+    // borderStyle: 'dashed',
+    marginTop: 20,
+    backgroundColor: '#949399',
+    marginBottom: 10,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   imageContainer: {
     width: 250,
     height: 250,
     position: 'relative',
+    marginTop: 20,
+    marginBottom: 40,
     // top: 10,
     // left: 10,
     // bottom: 10,

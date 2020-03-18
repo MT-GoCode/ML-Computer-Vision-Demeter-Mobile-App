@@ -88,8 +88,8 @@ export default function MainStackScreen() {
   return (
     <NavigationContainer >
       <MainStack.Navigator initialRouteName="ImageInput">
-        <MainStack.Screen name="ImageInput" component={ImageInput} />
-        <MainStack.Screen name="ImageOutput" component={ImageOutput} />
+        <MainStack.Screen name="ImageInput" component={ImageInput} options={{headerShown: false}}/>
+        <MainStack.Screen name="ImageOutput" component={ImageOutput} options={{headerShown: false}}/>
       </MainStack.Navigator>
     </NavigationContainer>
     
