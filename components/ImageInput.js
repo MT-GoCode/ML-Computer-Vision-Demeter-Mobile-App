@@ -35,6 +35,7 @@ const IMAGENET_CLASSES = {
   7: 'Tomato___Spider_mites Two-spotted_spider_mite',
   8: 'Tomato___Septoria_leaf_spot',
   9: 'Tomato___healthy'
+  
 }
 
 class ImageInput extends React.Component {
