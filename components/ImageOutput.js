@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   StatusBar,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Linking
 } from 'react-native'
 import * as tf from '@tensorflow/tfjs'
 import { fetch } from '@tensorflow/tfjs-react-native'
@@ -33,6 +34,12 @@ const styles2 = {imageWrapper: {
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  TextStyle: {
+ 
+    color: 'blue',
+    // textDecorationLine: 'underline'
+ 
   }}
 function ImageOutput(props) {
     const {route, navigation} = props;
@@ -54,7 +61,32 @@ function ImageOutput(props) {
                     <Image source={{uri:uri}} style = {styles.imageContainer} />
                 </View>
                 {/* <View>{predictions.map(p => renderPrediction(p))}</View> */}
-                <Text>{predictions}</Text>
+                <View style= {{justifyContent:'center', width: 250}}>
+                    <Text style={{fontWeight: "bold"}}>Disease Prediction: Early Blight{"\n"}</Text>
+
+                    <Text style={{fontWeight: "bold"}}>Causes: </Text>
+                    <Text><Text style={{fontStyle: "italic"}}>{`\u2022 Alternaria Solani`}</Text> fungus{"\n"}</Text>  
+                    {/* {causes.map((cause) => {`\u2022 ${cause} `})} */}
+                    
+
+                    <Text style={{fontWeight: "bold"}}>Symptoms: </Text>
+                    <Text>
+                    
+                        {`\u2022 Black or brown spots (usually 1 cm in diameter) `}{"\n"}
+                        {`\u2022 Leaf spots are leathery and are often in concentric rings `}{"\n"}
+                        {`\u2022 Fruit spots are sunken and dry and also have a concentric pattern `}{"\n"}
+                        {/* {symptoms.map((symptom) => {`\u2022 ${symptom} `})} */}
+                    </Text>
+                    <Text style={{fontWeight: "bold"}}>Cures: </Text>
+                    <Text>
+                        {`\u2022 Avoid overhead irrigation ` +"\n"}
+                        {`\u2022 Crop rotation is useful for infested gardens `}{"\n"}
+                        {`\u2022 Copper fungicides applied at the first sign of infestation and repeated every 7 to 10 days may provide control `}{"\n"}
+                        {/* {cures.map((cure) => {`\u2022 ${cure} `})} */}
+                    </Text>
+                    <Text style={{color: 'blue', textDecorationLine: 'underline'}} onPress={ ()=> Linking.openURL('http://ipm.ucanr.edu/PMG/GARDEN/VEGES/DISEASES/tomearlyblight.html') } >Click to visit the UCANR website for more information</Text>
+                </View>
+
                 <TouchableOpacity
                     style={styles2.imageWrapper}
                     onPress={() => {navigation.navigate("ImageInput")}}>

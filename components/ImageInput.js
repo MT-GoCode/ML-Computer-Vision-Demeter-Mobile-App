@@ -128,6 +128,7 @@ class ImageInput extends React.Component {
 
     const tensa = tf.tensor4d(buffer, [1, height, width, 3])
     const tensb = tf.image.resizeNearestNeighbor(tensa, [128,128])
+    console.log(tensb.shape)
     return tensb
 
   }
@@ -166,7 +167,9 @@ class ImageInput extends React.Component {
       //   }).slice(0, 3);
 
       console.log('max: ' + maxIndex)
+      console.log(IMAGENET_CLASSES[maxIndex])
       this.setState({ predictions: IMAGENET_CLASSES[maxIndex] })
+      
       this.props.navigation.navigate("ImageOutput", {uri: this.state.uri, predictions: IMAGENET_CLASSES[maxIndex]})
       this.setState({showDisplay:true})
       // console.log("pred " + predictions)
